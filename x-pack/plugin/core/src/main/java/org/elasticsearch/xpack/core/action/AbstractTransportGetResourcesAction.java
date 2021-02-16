@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 package org.elasticsearch.xpack.core.action;
 
@@ -121,7 +122,13 @@ public abstract class AbstractTransportGetResourcesAction<Resource extends ToXCo
                     if (requiredMatches.hasUnmatchedIds()) {
                         listener.onFailure(notFoundException(requiredMatches.unmatchedIdsString()));
                     } else {
-                        listener.onResponse(new QueryPage<>(docs, totalHitCount, getResultsField()));
+                        // if only exact ids have been given, take the count from docs to avoid potential duplicates
+                        // in versioned indexes (like transform)
+                        if (requiredMatches.isOnlyExact()) {
+                            listener.onResponse(new QueryPage<>(docs, docs.size(), getResultsField()));
+                        } else {
+                            listener.onResponse(new QueryPage<>(docs, totalHitCount, getResultsField()));
+                        }
                     }
                 }
 

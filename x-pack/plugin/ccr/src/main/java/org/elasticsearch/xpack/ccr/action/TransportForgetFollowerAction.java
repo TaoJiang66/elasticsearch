@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 package org.elasticsearch.xpack.ccr.action;
@@ -28,6 +29,7 @@ import org.elasticsearch.common.lease.Releasable;
 import org.elasticsearch.index.Index;
 import org.elasticsearch.index.shard.IndexShard;
 import org.elasticsearch.indices.IndicesService;
+import org.elasticsearch.tasks.Task;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.TransportService;
 import org.elasticsearch.xpack.ccr.CcrRetentionLeases;
@@ -89,9 +91,9 @@ public class TransportForgetFollowerAction extends TransportBroadcastByNodeActio
     }
 
     @Override
-    protected EmptyResult shardOperation(final ForgetFollowerAction.Request request, final ShardRouting shardRouting) {
+    protected EmptyResult shardOperation(final ForgetFollowerAction.Request request, final ShardRouting shardRouting, Task task) {
         final Index followerIndex = new Index(request.followerIndex(), request.followerIndexUUID());
-        final Index leaderIndex = clusterService.state().metaData().index(request.leaderIndex()).getIndex();
+        final Index leaderIndex = clusterService.state().metadata().index(request.leaderIndex()).getIndex();
         final String id = CcrRetentionLeases.retentionLeaseId(
                 request.followerCluster(),
                 followerIndex,
@@ -147,5 +149,4 @@ public class TransportForgetFollowerAction extends TransportBroadcastByNodeActio
             final String[] concreteIndices) {
         return null;
     }
-
 }
